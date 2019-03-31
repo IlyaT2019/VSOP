@@ -68,6 +68,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\ChartParametr.cs" />
     <Compile Include="Core\Document.cs" />
     <Compile Include="Core\Api.cs" />
     <Compile Include="Core\ApiExcel.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Core\Ppoint.cs" />
     <Compile Include="Core\Word.cs" />
     <Compile Include="Core\OfficeApp.cs" />
+    <Compile Include="Core\SheetParametr.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

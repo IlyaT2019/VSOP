@@ -104,6 +104,7 @@
                 <RowDefinition></RowDefinition>
                 <RowDefinition></RowDefinition>
                 <RowDefinition></RowDefinition>
+
             </Grid.RowDefinitions>
             <Button Grid.Row="1" 
                     Background="Black" 
@@ -116,7 +117,7 @@
                             <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_home}"></VisualBrush>
                         </Rectangle.OpacityMask>
                     </Rectangle>
-                    <Button x:Name="ButtonStartPage" Content="Начальная страница" Background="Black" Foreground="#FF02A4A4" FontSize="14" Command="{Binding OpenStartPageTab}" CommandParameter="{Binding ElementName=ParentGrid}"/>
+                    <Button x:Name="ButtonStartPage" Content="Начальные данные" Background="Black" Foreground="White" FontSize="14" Command="{Binding OpenStartPageTab}" CommandParameter="{Binding ElementName=ParentGrid}"/>
                 </StackPanel>
             </Button>
             <Button Grid.Row="2" 
@@ -172,6 +173,18 @@
                     </Rectangle>
                     <Button x:Name="Button3DModels" Content="3D модели" Background="Black" Foreground="#FF02A4A4" BorderBrush="#FF0A0101" FontSize="14"/>
                 </StackPanel>
+            </Button>
+            <Button Grid.Row="6"  
+                    Background="Black" 
+                    Foreground="#FF02A4A4"
+                    Margin="160,35,0,0">
+                <Rectangle Width="20" 
+                           Height="20" 
+                           Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_cog}"></VisualBrush>
+                    </Rectangle.OpacityMask>
+                </Rectangle>
             </Button>
         </Grid>
 
@@ -238,7 +251,7 @@
                             <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_list_check}"></VisualBrush>
                         </Rectangle.OpacityMask>
                     </Rectangle>
-                </Button>               
+                </Button>
                 <Button Margin="3" 
                         Command="{Binding AddCommand}" 
                         CommandParameter="{Binding ElementName=TemplateColumnAct}" 
@@ -280,7 +293,7 @@
                         </Rectangle.OpacityMask>
                     </Rectangle>
                 </Button>
-                
+
                 <Button Margin="3" 
                         Command="{Binding RemoveVariable}"                        
                         Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}"
@@ -348,37 +361,6 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-
-            <ComboBox x:Name="ComboBoxNameTables"
-                      Visibility="Visible"
-                      Grid.Row="1"
-                      Grid.Column="0"
-                      Width="240"
-                      Height="30"
-                      Background="#FFDEDEDE"
-                      HorizontalAlignment="Center"
-                      VerticalAlignment="Top"
-                      IsEnabled="True"                              
-                      ItemsSource="{Binding BaseView.NameTables}" 
-                      SelectedIndex="0"
-                      SelectedItem="{Binding Path=BaseView.SelectedTable}" 
-                      BorderBrush="Black" 
-                      FontSize="14" 
-                      Foreground="Black" Margin="200,25,202,0">
-            </ComboBox>
-
-            <DataGrid x:Name="DataGridSurface"
-                      Visibility="Visible"
-                      Grid.Row="1"
-                      Grid.Column="0"
-                      Background="#FFDEDEDE"
-                      HorizontalAlignment="Center" 
-                      Margin="165,75,157,53"
-                      ItemsSource="{Binding BaseView.Surface}" 
-                      Style="{StaticResource AzureDataGrid}"
-                      MinWidth="320" 
-                      MinHeight="350"/>
-
             <ListBox  x:Name="LisboxResultVariable" 
                       Visibility="Hidden"
                       HorizontalAlignment="Center"
@@ -387,6 +369,59 @@
                       Width="400" 
                       Height="450"/>
 
+            <GroupBox Grid.Row="1"
+                      Background="#FFDEDEDE"
+                      Grid.Column="0" 
+                      BorderBrush="{x:Null}"
+                      Visibility="Hidden">
+                <ScrollViewer>
+                    <StackPanel>
+                        <ComboBox x:Name="ComboBoxNameTables"
+                                  Visibility="Visible"
+                                  Width="240"
+                                  Height="30"
+                                  Background="#FFDEDEDE"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Top"
+                                  IsEnabled="True"                              
+                                  ItemsSource="{Binding BaseView.NameTables}" 
+                                  SelectedIndex="0"
+                                  SelectedItem="{Binding Path=BaseView.SelectedTable}" 
+                                  BorderBrush="Black" 
+                                  FontSize="14" 
+                                  Foreground="Black"/>
+                        <DataGrid x:Name="DataGridSurface"
+                              Visibility="Visible"                                                
+                              Background="#FFDEDEDE"
+                              HorizontalAlignment="Center" 
+                              Margin="20"
+                              ItemsSource="{Binding BaseView.Surface}" 
+                              Style="{StaticResource AzureDataGrid}"
+                              MinWidth="320" 
+                              MinHeight="350"/>
+                        <Image MinHeight="350"
+                               MinWidth="320"
+                               Source="{Binding BaseView.ImageSource}">
+                        </Image>
+                    </StackPanel>
+                </ScrollViewer>
+            </GroupBox>
+
+            <GroupBox Grid.Row="1"
+                      Background="#FFDEDEDE"
+                      Grid.Column="0" 
+                      BorderBrush="{x:Null}"
+                      Visibility="Hidden">
+                <StackPanel>
+                    <Label Content="Выберить рабочий каталог" 
+                       HorizontalAlignment="Left"  
+                       VerticalAlignment="Top" 
+                       Margin="50,34,0,0"/>
+                    <TextBox Text="">
+
+                    </TextBox>
+                </StackPanel>
+            </GroupBox>
 
             <!--
                     <Button Grid.Column="0" Command="{Binding Redaction}">Редактировать</Button>

@@ -10,7 +10,7 @@ namespace Office.Core.Interface
     public interface IActBase
     {
         Task OpenAsync(string path, Filter filter);
-        void Create(string path, Filter filter);
+        Task CreateAsync(string path, Filter filter);
         void Save();
         Task<DataSet> ReadAsync(string path);        
         void Close();
