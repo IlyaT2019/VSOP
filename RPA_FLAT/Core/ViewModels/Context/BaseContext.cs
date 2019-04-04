@@ -20,35 +20,86 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using Tool;
 
-namespace RPA_FLAT.Core.Context
+namespace RPA_FLAT.Core.ViewModels.Context
 {
     public class BaseContext
     {
         public AppRepository<object> AppRepository { get; set; }
-        public BaseView BaseView { get; set; }
+        private Excel _excel;
+
+        private string selectedTable = "Выбрите название таблицы";
+        public string  SelectedTable
+        {
+            get => selectedTable;
+            set 
+            {
+                selectedTable = value;
+                ViewTable(selectedTable);
+            }
+        }
 
         public BaseContext()
         {                       
-            AppRepository = AppRepository<object>.Init();            
-            CreateWorkFolder();
-            BaseView = new BaseView(AppRepository);
+            AppRepository = AppRepository<object>.Init();
+            _excel = (Excel)new ApiExcel().Create();
+            AppRepository.WorkDir = ConfigurationManager.AppSettings["WorkDir"];
+            AppRepository.AppVariables.FirstOrDefault(a => a.NameAppVariable == NameAppVariable.WorkDir).Value = AppRepository.WorkDir; 
         }
 
-        private async void CreateWorkFolder()
+        private async void ViewTable(string nameTable)
         {
-            await Task.Run(() => 
-            {
-                var pathWorkDir = ConfigurationManager.AppSettings["WorkDir"];
-                AppRepository.AppVariables.FirstOrDefault(i=>i.NameAppVariable == NameAppVariable.WorkDir).Value = pathWorkDir;
-                if (!Directory.Exists(pathWorkDir))
-                {
-                    Directory.CreateDirectory(pathWorkDir);                  
-                }
-                
-            });            
+            AppRepository.Surface = (DataTable)AppRepository.AppVariables.FirstOrDefault(t => t.NameAppVariable == NameAppVariable.BaseTable).Value;
+            var pathSaveImage = Path.Combine((string)AppRepository.AppVariables.FirstOrDefault(v => v.NameAppVariable == NameAppVariable.WorkDir).Value, "Исходная поверхность.jpeg");
+            await CreateImageBaseSurfase(pathSaveImage, AppRepository.Surface);
+            SetImageSource(pathSaveImage);
         }
+
+        private async Task CreateImageBaseSurfase(string pathSaveImage, DataTable dT)
+        {
+            await _excel.CreateAsync(new Office.Core.Filter() { DisplayAlerts = false, Visible = false });
+            await _excel.WritingDateTableInExcel(new SheetParametr() { IndexPage = 1 }, dT);
+            await _excel.CreateChart(new SheetParametr() { IndexPage = 1 }, new ChartParametr() { Left = 200, Top = 200, Height = 300, Width = 300, PathToSave = pathSaveImage });
+            _excel.Close();
+        }
+
+        private void SetImageSource(string pathSaveImage)
+        {
+            BitmapImage bitmapImage = new BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.UriSource = new Uri(pathSaveImage);
+            bitmapImage.EndInit();
+            AppRepository.ImageSource = bitmapImage;
+        }
+
+        private DataTable SetFilter(DataTable dataTable)
+        {
+            var dTAct = new DataTableAct(dataTable);
+            dTAct.DeleteNullColumns();
+            dTAct.DeleteNullRows();
+            dTAct.RenameColumns(new Tool.Filter());
+            return dTAct.UpdateDt;
+        }
+
+        private Command setFolder;
+        public Command SetFolder
+        {
+            get => setFolder ?? (setFolder = new Command((o) => 
+            {
+                using (var dialogService = new DialogService())
+                {
+                    var informDs = dialogService.Open();
+                    if (informDs != null)
+                    {
+                        AppRepository.AppVariables.FirstOrDefault(i => i.NameAppVariable == NameAppVariable.WorkDir).Value = informDs.Path;
+                        AppRepository.WorkDir = informDs.Path;
+                    }
+                }
+            }));                
+        }
+
 
         #region Открытие/закрытие вкладок
         private Command openStartPageTab;
@@ -57,11 +108,12 @@ namespace RPA_FLAT.Core.Context
             get => openStartPageTab ?? (openStartPageTab = new Command((o) =>
             {
                 var parentGrid = o as Grid;
-                var comboBoxNameTables = parentGrid.FindChild<ComboBox>("ComboBoxNameTables");
-                comboBoxNameTables.Visibility = Visibility.Visible;
+                
+                var groupBoxStartPage = parentGrid.FindChild<GroupBox>("GroupBoxStartPage");
+                groupBoxStartPage.Visibility = Visibility.Visible;
 
-                var dataGridSurface = parentGrid.FindChild<DataGrid>("DataGridSurface");
-                dataGridSurface.Visibility = Visibility.Visible;
+                var groupBoxSetting = parentGrid.FindChild<GroupBox>("GroupBoxSetting");
+                groupBoxSetting.Visibility = Visibility.Hidden;                
 
                 var dataGridVariable = parentGrid.FindChild<DataGrid>("DataGridVariable");
                 dataGridVariable.Visibility = Visibility.Hidden;
@@ -86,12 +138,12 @@ namespace RPA_FLAT.Core.Context
             get => openVariablesTab ?? (openVariablesTab = new Command((o) =>
             {
                 var parentGrid = o as Grid;
-                var comboBoxNameTables = parentGrid.FindChild<ComboBox>("ComboBoxNameTables");
-                comboBoxNameTables.Visibility = Visibility.Hidden;
+                var groupBoxStartPage = parentGrid.FindChild<GroupBox>("GroupBoxStartPage");
+                groupBoxStartPage.Visibility = Visibility.Hidden;
 
-                var dataGridSurface = parentGrid.FindChild<DataGrid>("DataGridSurface");
-                dataGridSurface.Visibility = Visibility.Hidden;
-
+                var groupBoxSetting = parentGrid.FindChild<GroupBox>("GroupBoxSetting");
+                groupBoxSetting.Visibility = Visibility.Hidden;
+                
                 var dataGridVariable = parentGrid.FindChild<DataGrid>("DataGridVariable");
                 dataGridVariable.Visibility = Visibility.Visible;
 
@@ -116,12 +168,12 @@ namespace RPA_FLAT.Core.Context
             get => openCommandsTab ?? (openCommandsTab = new Command((o) =>
             {
                 var parentGrid = o as Grid;
-                var comboBoxNameTables = parentGrid.FindChild<ComboBox>("ComboBoxNameTables");
-                comboBoxNameTables.Visibility = Visibility.Hidden;
+                var groupBoxStartPage = parentGrid.FindChild<GroupBox>("GroupBoxStartPage");
+                groupBoxStartPage.Visibility = Visibility.Hidden;
 
-                var dataGridSurface = parentGrid.FindChild<DataGrid>("DataGridSurface");
-                dataGridSurface.Visibility = Visibility.Hidden;
-
+                var groupBoxSetting = parentGrid.FindChild<GroupBox>("GroupBoxSetting");
+                groupBoxSetting.Visibility = Visibility.Hidden;
+                
                 var dataGridVariable = parentGrid.FindChild<DataGrid>("DataGridVariable");
                 dataGridVariable.Visibility = Visibility.Hidden;
 
@@ -145,11 +197,11 @@ namespace RPA_FLAT.Core.Context
             get => openResultTab ?? (openResultTab = new Command((o)=> 
             {
                 var parentGrid = o as Grid;
-                var comboBoxNameTables = parentGrid.FindChild<ComboBox>("ComboBoxNameTables");
-                comboBoxNameTables.Visibility = Visibility.Hidden;
+                var groupBoxStartPage = parentGrid.FindChild<GroupBox>("GroupBoxStartPage");
+                groupBoxStartPage.Visibility = Visibility.Visible;
 
-                var dataGridSurface = parentGrid.FindChild<DataGrid>("DataGridSurface");
-                dataGridSurface.Visibility = Visibility.Hidden;
+                var groupBoxSetting = parentGrid.FindChild<GroupBox>("GroupBoxSetting");
+                groupBoxSetting.Visibility = Visibility.Hidden;
 
                 var dataGridVariable = parentGrid.FindChild<DataGrid>("DataGridVariable");
                 dataGridVariable.Visibility = Visibility.Hidden;
@@ -177,35 +229,78 @@ namespace RPA_FLAT.Core.Context
 
             }));
         }
+
+        private Command openSetting;
+        public Command OpenSetting
+        {
+            get => openSetting ?? (openSetting = new Command((o) =>
+            {
+                var parentGrid = o as Grid;
+                var comboBoxNameTables = parentGrid.FindChild<ComboBox>("ComboBoxNameTables");
+                comboBoxNameTables.Visibility = Visibility.Hidden;
+
+                var groupBoxSetting = parentGrid.FindChild<GroupBox>("GroupBoxSetting");
+                groupBoxSetting.Visibility = Visibility.Visible;
+
+                var dataGridSurface = parentGrid.FindChild<DataGrid>("DataGridSurface");
+                dataGridSurface.Visibility = Visibility.Hidden;
+
+                var dataGridVariable = parentGrid.FindChild<DataGrid>("DataGridVariable");
+                dataGridVariable.Visibility = Visibility.Hidden;
+
+                var dataGridCommand = parentGrid.FindChild<DataGrid>("DataGridCommand");
+                dataGridCommand.Visibility = Visibility.Hidden;
+
+                var labelNameTag = parentGrid.FindChild<Label>("LabelNameTag");
+                labelNameTag.Content = "НАСТРОЙКИ ПРИЛОЖЕНИЯ";
+
+                var lisboxResultVariable = parentGrid.FindChild<ListBox>("LisboxResultVariable");
+                lisboxResultVariable.Visibility = Visibility.Hidden;
+                lisboxResultVariable.ItemsSource = new ResultView(AppRepository).GetContentListBox();
+
+                var stackPanelTools = parentGrid.FindChild<StackPanel>("StackPanelTools");
+                stackPanelTools.Visibility = Visibility.Hidden;
+
+            }));
+        }
         #endregion
 
         #region Открытие файла и получение DataView
         private Command _openFile;
         public Command OpenFile
         {
-            get => _openFile ?? (_openFile = new Command(setData));
-        }
-
-        private async void setData(object wpfElement)
-        {
-            using (var dialogService = new DialogService())
+            get => _openFile ?? (_openFile = new Command(async(o)=>
             {
-                var informDs = dialogService.Open();
-                if (informDs != null)
+                using (var dialogService = new DialogService())
                 {
-                    switch (informDs.ExpansionFile.GetHashCode())
+                    var informDs = dialogService.Open();
+                    if (informDs != null)
                     {
-                        case 0: break;
-                        case 1: break;
-                        case 2:
-                            await BaseView.SetDataTableOfSurface(informDs.Path);                            
-                            break;
+                        switch (informDs.ExpansionFile.GetHashCode())
+                        {
+                            case 0: break;
+                            case 1: break;
+                            case 2:
+                                await GetDTablesFromExcel(informDs.Path);
+                                break;
+                        }
                     }
                 }
+            }));
+        }
+
+        //TODO: доработка механизма отображения имен таблиц
+        private async Task GetDTablesFromExcel(string path)
+        {
+            var dS = await _excel.ReadAsync(path);
+            foreach (DataTable t in dS.Tables)
+            {
+                var dT = SetFilter(t);
+                AppRepository.NameTables.Add(t.TableName);
+                AppRepository.AppVariables.FirstOrDefault(i => i.NameAppVariable == NameAppVariable.BaseTable).Value = dT;
             }
         }
 
-       
         /*
         private Command redaction;
         public Command Redaction

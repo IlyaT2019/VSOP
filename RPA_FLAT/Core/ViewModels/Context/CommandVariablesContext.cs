@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace RPA_FLAT.Core.Context
+namespace RPA_FLAT.Core.ViewModels.Context
 {
     public class CommandVariablesContext
     {        

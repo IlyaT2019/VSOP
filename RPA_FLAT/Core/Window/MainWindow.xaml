@@ -369,7 +369,8 @@
                       Width="400" 
                       Height="450"/>
 
-            <GroupBox Grid.Row="1"
+            <GroupBox x:Name="GroupBoxStartPage"
+                      Grid.Row="1"
                       Background="#FFDEDEDE"
                       Grid.Column="0" 
                       BorderBrush="{x:Null}"
@@ -384,9 +385,9 @@
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Top"
                                   IsEnabled="True"                              
-                                  ItemsSource="{Binding BaseView.NameTables}" 
+                                  ItemsSource="{Binding AppRepository.NameTables}" 
                                   SelectedIndex="0"
-                                  SelectedItem="{Binding Path=BaseView.SelectedTable}" 
+                                  SelectedItem="{Binding Path=SelectedTable}" 
                                   BorderBrush="Black" 
                                   FontSize="14" 
                                   Foreground="Black"/>
@@ -395,32 +396,47 @@
                               Background="#FFDEDEDE"
                               HorizontalAlignment="Center" 
                               Margin="20"
-                              ItemsSource="{Binding BaseView.Surface}" 
+                              ItemsSource="{Binding AppRepository.Surface}" 
                               Style="{StaticResource AzureDataGrid}"
                               MinWidth="320" 
                               MinHeight="350"/>
-                        <Image MinHeight="350"
-                               MinWidth="320"
-                               Source="{Binding BaseView.ImageSource}">
-                        </Image>
+                        <Image Height="250"
+                               Width="250"
+                               HorizontalAlignment="Center" 
+                               Source="{Binding AppRepository.ImageSource}"/>
                     </StackPanel>
                 </ScrollViewer>
             </GroupBox>
 
-            <GroupBox Grid.Row="1"
+            <GroupBox x:Name="GroupBoxSetting" 
+                Grid.Row="1"
                       Background="#FFDEDEDE"
                       Grid.Column="0" 
                       BorderBrush="{x:Null}"
-                      Visibility="Hidden">
-                <StackPanel>
-                    <Label Content="Выберить рабочий каталог" 
-                       HorizontalAlignment="Left"  
-                       VerticalAlignment="Top" 
-                       Margin="50,34,0,0"/>
-                    <TextBox Text="">
-
-                    </TextBox>
-                </StackPanel>
+                      Visibility="Visible">
+                <Grid>
+                    <DockPanel Height="100"
+                        Margin="15,26,177,364">
+                        <Label DockPanel.Dock="Top" 
+                               Height="35">Укажите рабочую директорию:</Label>
+                        <TextBox Height="40" 
+                                 DockPanel.Dock="Left"
+                                 Width="300"
+                                 Text="{Binding AppRepository.WorkDir}">
+                        </TextBox>
+                        <Button Height="40"                            
+                                DockPanel.Dock="Right"
+                                Command="{Binding SetFolder}">
+                            <Rectangle Width="20" 
+                                       Height="20" 
+                                       Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                                <Rectangle.OpacityMask>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_folder_open}"></VisualBrush>
+                                </Rectangle.OpacityMask>
+                            </Rectangle>
+                        </Button>
+                    </DockPanel>
+                </Grid>
             </GroupBox>
 
             <!--

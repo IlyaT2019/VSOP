@@ -13,7 +13,7 @@ using Office.Core.Interface;
 
 namespace Office.Core
 {
-    public class Excel : OfficeApp, IActBase
+    public class Excel : OfficeApp, IActBase, IExcelAct
     {
         protected override Application ExcelApp { get => base.ExcelApp; set => base.ExcelApp = value; }
 
@@ -57,7 +57,7 @@ namespace Office.Core
             });                         
         }
 
-        public async Task CreateAsync(string path, Filter filter)
+        public async Task CreateAsync(Filter filter)
         {
             await Task.Run(()=> 
             {
@@ -65,16 +65,7 @@ namespace Office.Core
                 SetFilters(filter, ExcelApp);
                 workbook = ExcelApp.Workbooks.Add();
             });            
-        }        
-
-        public Worksheet SetWorkSheet(SheetParametr excelParametr)
-        {
-            if (string.IsNullOrEmpty(excelParametr.NamePage))
-              return (Worksheet)workbook.Worksheets[excelParametr.IndexPage];
-            else
-                return (Worksheet)workbook.Worksheets[excelParametr.NamePage];
         }
-
 
         public async Task CreateChart(SheetParametr excelParametr, ChartParametr chartParametr)
         {
@@ -105,6 +96,14 @@ namespace Office.Core
                     }
                 }
             });            
+        }
+
+        private Worksheet SetWorkSheet(SheetParametr excelParametr)
+        {
+            if (string.IsNullOrEmpty(excelParametr.NamePage))
+                return (Worksheet)workbook.Worksheets[excelParametr.IndexPage];
+            else
+                return (Worksheet)workbook.Worksheets[excelParametr.NamePage];
         }
 
         public void Save()

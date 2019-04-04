@@ -1,6 +1,6 @@
 ﻿using MahApps.Metro.Controls;
 using RPA_FLAT.Core;
-using RPA_FLAT.Core.Context;
+using RPA_FLAT.Core.ViewModels.Context;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +29,6 @@ namespace RPA_FLAT.Core.Window
             InitializeComponent();
 
             DataContext = new BaseContext();
-        }  
+        }
     }
 }

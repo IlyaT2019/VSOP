@@ -3,10 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace RPA_FLAT.Core.Model
 {
@@ -14,6 +16,44 @@ namespace RPA_FLAT.Core.Model
     {
         private static AppRepository<G> appRepository;
         private static object lockobj = new object();
+         
+
+        private ObservableCollection<string> nameTables { get; set; }
+        public ObservableCollection<string> NameTables
+        {
+            get => nameTables;
+            set
+            {
+                nameTables = value;
+                OnPropertyChanged("NameTables");
+            }
+        }
+
+        private DataTable surface { get; set; }
+        public DataTable Surface
+        {
+            get => surface;
+            set
+            {
+                surface = value;
+                OnPropertyChanged("Surface");
+            }
+        }
+
+        private BitmapImage imageSource;
+        public BitmapImage ImageSource
+        {
+            get => imageSource;
+            set
+            {
+                imageSource = value;
+                OnPropertyChanged("ImageSource");
+            }
+        }
+
+        public bool IsEnabledComboBox { get; set; } = false;
+
+        public string WorkDir { get; set; }
 
         private string newName { get; set; }
         public string NewName
@@ -66,6 +106,7 @@ namespace RPA_FLAT.Core.Model
             InitAppVariableCommands2();
             InitAppVariablesCommands3();            
             point = new PointSurface();
+            NameTables = new ObservableCollection<string>() { "Выбрите название таблицы" };
         }
 
         private void InitAppVar()
